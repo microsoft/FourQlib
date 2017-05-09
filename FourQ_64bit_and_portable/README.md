@@ -9,7 +9,7 @@ project files for compilation and testing in Windows.
 * [`FourQ_64bit_and_portable/makefile`](FourQ_64bit_and_portable/makefile): Makefile for compilation using GNU GCC or clang compilers 
 on Linux. 
 * Main .c and .h files: library and header files. Public API for ECC scalar multiplication, key exchange and signatures is in 
-[`FourQ_64bit_and_portable\FourQ_api.h`](FourQ_64bit_and_portable\FourQ_api.h).        
+[`FourQ_64bit_and_portable/FourQ_api.h`](FourQ_64bit_and_portable/FourQ_api.h).        
 * [`FourQ_64bit_and_portable/AMD64/`](FourQ_64bit_and_portable/AMD64/): folder with library files for optimized x64 implementation.
 * [`FourQ_64bit_and_portable/ARM64/`](FourQ_64bit_and_portable/ARM64/): folder with library files for optimized 64-bit ARM 
 implementation.
