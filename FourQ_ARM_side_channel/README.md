@@ -115,7 +115,7 @@ $ sudo ./tests_Cortex-M4/monitor.sh
 ```
 
 From a different terminal window on the server machine, program the device with one of the following commands
-from the FourQ_ARM_side_channel folder:
+from the `FourQ_ARM_side_channel` folder:
 
 ```sh
 $ st-flash write tests_Cortex-M4/fp_tests.bin 0x8000000
