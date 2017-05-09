@@ -1,0 +1,684 @@
+/*************************************************************************************
+* FourQ: 4-dimensional decomposition on a Q-curve with CM in twisted Edwards form
+*
+*    Copyright (c) Microsoft Corporation. All rights reserved.
+*
+*
+* Abstract: This MAGMA script computes the full FourQ variable-based multiplication as 
+*           detailed in Algorithm 2 of the paper. Inherently included in this script 
+*           are the endomorphisms, the scalar decomposition and the scalar recoding 
+*           routine in Algorithm 1. 
+*           The code also verifies the operation counts and claims in Theorem 1.
+*
+* This code is based on the paper "FourQ: four-dimensional decompositions on a 
+* Q-curve over the Mersenne prime" by Craig Costello and Patrick Longa, in Advances 
+* in Cryptology - ASIACRYPT, 2015.
+* Preprint available at http://eprint.iacr.org/2015/565.
+**************************************************************************************/ 
+
+clear;
+
+// Define curve
+p:=2^127-1; Fp:=GF(p); Fp2<i>:=ExtensionField<Fp,x|x^2+1>;
+AS<x,y>:=AffineSpace(Fp2,2);
+
+// The complete twisted Edwards curve and prime subgroup order
+d:=125317048443780598345676279555970305165*i + 4205857648805777768770;
+E:=Curve(AS,[-x^2+y^2-(1+d*x^2*y^2)]);
+
+mu:=2^256;  // Scalars allowed in [0,mu)
+
+// CONSTANTS FOR ENDOMORPHISMS
+
+// phi constants
+cphi0:=49615650983565284830950896420241471514*i + 110680464442257309687;
+cphi1:=131306912742858181648727312260439119609*i + 92233720368547758087;
+cphi2:=160666015865631300014011952927357137809*i + 276701161105643274261;
+cphi3:=107027644557995218531204623577807990436*i + 36893488147419103235;
+cphi4:=24279268184862963117522688682631129173*i + 55340232221128654851;
+cphi5:=92472642025247131565767320804994133491*i + 184467440737095516175;
+cphi6:=14804100590025031399847337894104161255*i + 332041393326771929112;
+cphi7:=76283848507754718862858058709728786458*i + 442721857769029238819;
+cphi8:=41635071732389019719735756359456329456*i + 3135946492530623774960;
+cphi9:=21045324596686230484035983431638590725*i + 39844967199212631493615;
+// psi constants
+cpsi1:=4095177184363520459066*i + 57123674603396429897431647433607300847;
+cpsi2:=44824135016688633386011024159913800562*i + 4205857648805777768771;
+cpsi3:=101947809620085063283442671593521101409*i + 110680464442257309705;
+cpsi4:=68193373840384168448244632122363004318*i + 170141183460469231621006839273626796022;
+// tau constant
+ctau1:=221360928884514619410*i + 33754435779700894835198039471158097091;
+// tau_dual constant
+ctaudual1:=170141183460469231510326374831369486353*i + 99231301967130569661901792840482943028;
+
+// CONSTANTS FOR SCALAR DECOMPOSITION
+
+// The Babai-optimal basis
+b11:=650487742939046294;
+b12:=1397215820276968864; // negated
+b13:=523086274270593807;
+b14:=598824378691085905;  // negated
+b21:=2110318963211420372; 
+//b22:=1;                 // negated 
+//b23:=1; 
+b24:=2727991412926801872; 
+b31:=1705647224544756482;  
+b32:=199320682881407569;
+b33:=3336360048424633503; // negated
+b34:=765171327772315031;
+b41:=1400113754146392127; 
+b42:=3540637644719456050; 
+b43:=471270406870313397;  // negated
+b44:=1789345740969872106; // negated
+  
+// The offset vector
+c1:=8234880650715616668; 
+c2:=6483313240794689388; 
+c3:=9066539331533273720;
+c4:=7765751599377320055;
+
+// The precomputed fractions for the decomposition
+ell1:=50127518246259276682880317011538934615153226543083896339791;
+ell2:=22358026531042503310338016640572204942053343837521088510715;
+ell3:=5105580562119000402467322500999592531749084507000101675068;
+ell4:=19494034873545274265741574254707851381713530791194721254848;
+
+/*
+Function converts Q from representation R1 to R2. See Tables 2 and 3.
+*/
+R1toR2:=function(Q,Fp2_ops)
+
+  mul:=0; sqr:=0; add:=0;
+  Q[4]:=Q[4]+Q[4];            add+:=1;
+  t1:=Q[1]+Q[2];              add+:=1;
+  Q[2]:=Q[2]-Q[1];            add+:=1;
+  Q[1]:=t1;
+  Q[4]:=Q[4]*Q[5];            mul+:=1;
+  Q[3]:=Q[3]+Q[3];            add+:=1; 
+  Q[4]:=d*Q[4];               mul+:=1;
+
+  Fp2_ops:=[Fp2_ops[1]+mul,Fp2_ops[2]+sqr,Fp2_ops[3]+add];
+  Prune(~Q);
+
+  return Q,Fp2_ops;
+
+end function;
+
+/*
+Function converts Q from representation R1 to R3. See Tables 2 and 3.
+*/
+R1toR3:=function(Q,Fp2_ops)
+
+  mul:=0; sqr:=0; add:=0;
+  
+  t1:=Q[1]+Q[2];              add+:=1;           
+  Q[2]:=Q[2]-Q[1];            add+:=1;
+  Q[1]:=t1;
+  Q[4]:=Q[4]*Q[5];            mul+:=1;
+
+  Fp2_ops:=[Fp2_ops[1]+mul,Fp2_ops[2]+sqr,Fp2_ops[3]+add];
+  Prune(~Q);
+
+  return Q,Fp2_ops;
+
+end function;
+
+/*
+Function converts Q from representation R2 to R4. See Tables 2 and 3.
+*/
+R2toR4:=function(Q,Fp2_ops)
+
+  mul:=0; sqr:=0; add:=0;
+
+  t1:=Q[1]-Q[2];               add+:=1;
+  Q[2]:=Q[1]+Q[2];             add+:=1;
+  Q[1]:=t1;
+
+  Fp2_ops:=[Fp2_ops[1]+mul,Fp2_ops[2]+sqr,Fp2_ops[3]+add];
+  Prune(~Q);
+
+  return Q,Fp2_ops;
+
+end function;
+
+/*
+The DBL function on E. Only needs the (X,Y,Z) coordinates of input, 
+but outputs points in R1 as (X,Y,Z,Ta,Tb). See Section 5.3.
+*/
+DBL:=function(Q,Fp2_ops)
+
+    mul:=0; sqr:=0; add:=0;
+    
+    t1:=Q[1]^2;               sqr+:=1;
+    t2:=Q[2]^2;               sqr+:=1;
+    Q[1]:=Q[1]+Q[2];          add+:=1;
+    T1b:=t1+t2;               add+:=1;
+    t1:=t2-t1;                add+:=1;
+    t2:=Q[3]^2;               sqr+:=1;
+    T1a:=Q[1]^2;              sqr+:=1;
+    T1a:=T1a-T1b;             add+:=1;
+    t2:=t2+t2;                add+:=1;
+    t2:=t2-t1;                add+:=1;
+    Q[2]:=t1*T1b;             mul+:=1;
+    Q[1]:=t2*T1a;             mul+:=1;
+    Q[3]:=t1*t2;              mul+:=1;
+
+    Fp2_ops:=[Fp2_ops[1]+mul,Fp2_ops[2]+sqr,Fp2_ops[3]+add];
+
+    return [Q[1],Q[2],Q[3],T1a,T1b],Fp2_ops;
+
+end function;
+
+/*
+The ADD_core function on E. Takes Q in R3 and R in R2 and returns Q+R in R1. See Table 3.
+*/
+ADD_core:=function(Q,R,Fp2_ops)
+
+    mul:=0; sqr:=0; add:=0;
+    
+    Z3:=Q[4]*R[4];            mul+:=1;
+    t1:=Q[3]*R[3];            mul+:=1;
+    X3:=Q[1]*R[1];            mul+:=1;
+    Y3:=Q[2]*R[2];            mul+:=1;
+    t2:=t1-Z3;                add+:=1;
+    t1:=t1+Z3;                add+:=1;
+    T3b:=X3-Y3;               add+:=1;
+    T3a:=X3+Y3;               add+:=1;
+    X3:=T3b*t2;               mul+:=1;
+    Z3:=t1*t2;                mul+:=1;
+    Y3:=T3a*t1;               mul+:=1;
+
+    Fp2_ops:=[Fp2_ops[1]+mul,Fp2_ops[2]+sqr,Fp2_ops[3]+add];
+
+    return [X3,Y3,Z3,T3a,T3b],Fp2_ops;
+
+end function;
+
+/*
+The ADD function on E. Takes Q in R1 and R in R2 and returns Q+R in R1. See Table 3.
+*/
+ADD:=function(Q,R,Fp2_ops)
+
+    Q,Fp2_ops:=R1toR3(Q,Fp2_ops);
+    return ADD_core(Q,R,Fp2_ops);
+
+end function;
+
+/*
+This function is called every time an element from the lookup table is accessed. 
+In the actual C code we use masking to select between Q and -Q(=R), both in R2.
+*/
+negate_and_select:=function(Q,mask,Fp2_ops)
+
+  R:=[Q[2],Q[1],Q[3],-Q[4]]; 
+  Fp2_ops:=[Fp2_ops[1],Fp2_ops[2],Fp2_ops[3]+1];
+
+  if mask eq -1 then
+    return R,Fp2_ops;
+  else                     
+    return Q,Fp2_ops;
+  end if;
+
+end function;
+
+/*
+This is just the generic scalar multiplication used for testing, and for cofactor 
+killing to make sure the input point is of order N.
+*/
+GenericScalarMult:=function(P,k)
+  
+  Fp2_ops:=[0,0,0]; // Just for synching input/output
+
+  if k eq 0 then
+    return P;
+  else
+
+    bits:=IntegerToSequence(k,2);
+    Q:=[P[1],P[2],1,P[1],P[2]];
+    P:=R1toR2([P[1],P[2],1,P[1],P[2]],Fp2_ops);
+
+    for i:=#bits-1 to 1 by -1 do
+     Q,Fp2_ops:=DBL(Q,Fp2_ops);
+     if bits[i] eq 1 then
+        Q,Fp2_ops:=ADD(Q,P,Fp2_ops);
+      end if;
+    end for;
+
+    return Q;
+
+  end if;
+
+end function;
+
+/*
+Generate a random point T of order N on E.
+*/
+RandomNTorstionPoint:=function()
+
+	_<Y>:=PolynomialRing(Fp2);
+	repeat X:=Random(Fp2);
+	until HasRoot(-X^2+Y^2-(1+d*X^2*Y^2));
+	_,Y:=HasRoot(-X^2+Y^2-(1+d*X^2*Y^2));
+
+  T:=GenericScalarMult(E![X,Y],392);
+
+  return T;
+
+end function;
+
+/*
+THE MAPS: The four maps needed for our endomorphisms: tau, tau_dual, delphidel
+ and delpsidel.
+*/
+
+/*
+tau: E -> Ehat
+Input: P on E in homogeneous coordinates
+Output: tau(P) on Ehat in homogeneous coordinates
+*/
+
+tau:=function(P,Fp2_ops)
+
+  Prune(~P); Prune(~P);
+  mul:=0; sqr:=0; add:=0;
+
+  t0:=P[1]^2;                sqr+:=1;
+  t1:=P[2]^2;                sqr+:=1;
+  P[1]:=P[1]*P[2];           mul+:=1;
+  P[2]:=P[3]^2;              sqr+:=1;
+  P[3]:=t0+t1;               add+:=1;
+  P[2]:=2*P[2];              add+:=1;
+  t0:=t0-t1;                 add+:=1;
+  P[2]:=-P[2];               add+:=1;
+  P[1]:=P[1]*t0;             mul+:=1;
+  P[2]:=P[2]-t0;             add+:=1;
+  P[1]:=ctau1*P[1];          mul+:=1;
+  P[2]:=P[2]*P[3];           mul+:=1;
+  P[3]:=t0*P[3];             mul+:=1;
+
+  Fp2_ops:=[Fp2_ops[1]+mul,Fp2_ops[2]+sqr,Fp2_ops[3]+add];
+
+  return P, Fp2_ops;
+
+end function;			
+
+
+/*
+tau_dual: Ehat -> E
+Input: P on Ehat in homogeneous coordinates
+Output: tau_dual(P) on E in homogeneous coordinates
+*/
+
+tau_dual:=function(P,Fp2_ops)
+
+  mul:=0; sqr:=0; add:=0;
+	
+  t0:=P[1]^2;                sqr+:=1;
+  Append(~P,P[3]^2);         sqr+:=1;				
+  t1:=P[2]^2;                sqr+:=1;
+  P[3]:=2*P[4];              add+:=1;
+  P[4]:=t1-t0;               add+:=1;
+  t0:=t0+t1;                 add+:=1;               
+  P[1]:=P[1]*P[2];           mul+:=1;
+  P[3]:=P[3]-P[4];           add+:=1;
+  Append(~P,ctaudual1*P[1]); mul+:=1;
+  P[2]:=P[4]*P[3];           mul+:=1;
+  P[1]:=P[5]*t0;             mul+:=1;
+  P[3]:=t0*P[3];             mul+:=1;
+
+  Fp2_ops:=[Fp2_ops[1]+mul,Fp2_ops[2]+sqr,Fp2_ops[3]+add];
+
+  return P, Fp2_ops;
+
+end function;			
+
+/*
+delphidel: Ehat -> Ehat
+Input: P on Ehat 
+Output: delta(phi_W(delta_inv(P))) on Ehat, where delta: W->Ehat and 
+delta_inv: Ehat->W are isomorphisms and phi_W: W->W is the endomorphism on W.
+*/
+
+delphidel:=function(P,Fp2_ops)
+
+  mul:=0; sqr:=0; add:=0;
+  
+  t4:=P[3]^2;       sqr+:=1;
+  t3:=P[2]*P[3];    mul+:=1;
+  t0:=t4*cphi4;     mul+:=1;
+  t2:=P[2]^2;       sqr+:=1;
+  t0:=t0+t2;        add+:=1;
+  t1:=t3*cphi3;     mul+:=1;
+  t5:=t0-t1;        add+:=1;
+  t0:=t1+t0;        add+:=1;
+  t0:=t0*P[3];      mul+:=1;
+  t1:=t3*cphi1;     mul+:=1;
+  t0:=t0*t5;        mul+:=1;
+  t5:=t4*cphi2;     mul+:=1;
+  t5:=t5+t2;        add+:=1;
+  t6:=t1-t5;        add+:=1;
+  t1:=t1+t5;        add+:=1;
+  t6:=t6*t1;        mul+:=1;
+  t6:=cphi0*t6;     mul+:=1;
+  P[1]:=P[1]*t6;    mul+:=1;
+  t6:=t2^2;         sqr+:=1;
+  t2:=t3^2;         sqr+:=1;
+  t3:=t4^2;         sqr+:=1;
+  t1:=t2*cphi8;     mul+:=1;
+  t5:=t3*cphi9;     mul+:=1;
+  t1:=t1+t6;        add+:=1;
+  t2:=t2*cphi6;     mul+:=1;
+  t3:=t3*cphi7;     mul+:=1;
+  t1:=t1+t5;        add+:=1;
+  t2:=t2+t3;        add+:=1;
+  t1:=P[2]*t1;      mul+:=1;
+  P[2]:=t2+t6;      add+:=1;
+  P[1]:=P[1]*t1;    mul+:=1;
+  P[2]:=cphi5*P[2]; mul+:=1;
+  P[1]:=P[1]^p;     add+:=1/2;
+  P[2]:=P[2]*P[3];  mul+:=1;
+  P[3]:=t0*t1;      mul+:=1;
+  P[2]:=P[2]*t0;    mul+:=1;
+  P[3]:=P[3]^p;     add+:=1/2;
+  P[2]:=P[2]^p;     add+:=1/2;
+
+  Fp2_ops:=[Fp2_ops[1]+mul,Fp2_ops[2]+sqr,Fp2_ops[3]+add];
+
+  return P, Fp2_ops;
+
+end function;
+
+/*
+delpsidel: Ehat -> Ehat
+Input: P on Ehat 
+Output: delta(psi_W(delta_inv(P))) on Ehat, where delta: W->Ehat and 
+delta_inv: Ehat->W are isomorphisms and psi_W: W->W is the endomorphism on W.
+*/
+
+delpsidel:=function(P,Fp2_ops)
+
+  mul:=0; sqr:=0; add:=0;
+
+  P[1]:=P[1]^p;               add+:=1/2;
+  P[3]:=P[3]^p;               add+:=1/2;
+  P[2]:=P[2]^p;               add+:=1/2;
+  t2:=P[3]^2;                 sqr+:=1;
+  t0:=P[1]^2;                 sqr+:=1;
+  P[1]:=P[1]*t2;              mul+:=1;
+  P[3]:=t2*cpsi2;             mul+:=1;
+  t1:=t2*cpsi3;               mul+:=1;
+  t2:=t2*cpsi4;               mul+:=1;
+  P[3]:=t0+P[3];              add+:=1;
+  t2:=t0+t2;                  add+:=1;        
+  t1:=t0+t1;                  add+:=1;
+  t2:=-t2;                    add+:=1;
+  P[3]:=P[2]*P[3];            mul+:=1;
+  P[1]:=P[1]*t2;              mul+:=1;
+  P[2]:=P[3]*t1;              mul+:=1;
+  P[1]:=P[1]*cpsi1;           mul+:=1;
+  P[3]:=P[3]*t2;              mul+:=1;
+
+  Fp2_ops:=[Fp2_ops[1]+mul,Fp2_ops[2]+sqr,Fp2_ops[3]+add];
+
+  return P, Fp2_ops;
+
+end function;
+
+/*
+phi: E -> E
+Input: P on E 
+Output: phi(P) on E
+*/
+
+phi:=function(P,Fp2_ops);
+
+  P,Fp2_ops:=tau(P,Fp2_ops);
+  P,Fp2_ops:=delphidel(P,Fp2_ops);
+  P,Fp2_ops:=tau_dual(P,Fp2_ops);
+
+  return P,Fp2_ops;
+
+end function;
+
+/*
+psi: E -> E
+Input: P on E 
+Output: psi(P) on E
+*/
+
+psi:=function(P,Fp2_ops);
+
+  P,Fp2_ops:=tau(P,Fp2_ops);
+  P,Fp2_ops:=delpsidel(P,Fp2_ops);
+  P,Fp2_ops:=tau_dual(P,Fp2_ops);
+
+  return P,Fp2_ops;
+
+end function;
+
+
+/*
+The decomposition described in Proposition 5. The "if" and "while" statements
+at the end of the function are for simplicity in Magma. In the C code the "if"
+statement is turned into a constant-time masking and the "while" statements 
+are not necessary.
+Input: the integer scalar m in [0,2^256)
+Output: the multiscalar (a1,a2,a3,a4) described in Proposition 5.
+*/
+
+decomposition:=function(m)
+  
+  alpha1:=Floor(ell1*m/mu);
+  alpha2:=Floor(ell2*m/mu);
+  alpha3:=Floor(ell3*m/mu);
+  alpha4:=Floor(ell4*m/mu);
+
+  t0:=alpha1*b11;
+  a1:=m-t0;
+  t0:=alpha2*b21;
+  a1:=a1-t0;
+  t0:=alpha3*b31;
+  a1:=a1-t0;
+  t0:=alpha4*b41;
+  a1:=a1-t0;
+
+  a2:=alpha1*b12;
+  a2:=a2+alpha2;
+  t0:=alpha3*b32;
+  a2:=a2-t0;
+  t0:=alpha4*b42;
+  a2:=a2-t0;
+
+  a3:=alpha1*b13;
+  a3:=a3+alpha2;
+  t0:=alpha3*b33;
+  a3:=t0-a3;
+  t0:=alpha4*b43;
+  a3:=a3+t0;
+
+  a4:=alpha1*b14;
+  t0:=alpha2*b24;
+  a4:=a4-t0;
+  t0:=alpha3*b34;
+  a4:=a4-t0;
+  t0:=alpha4*b44;
+  a4:=a4+t0;
+
+  a1:=a1+c1;
+  a2:=a2+c2;
+  a3:=a3+c3;
+  a4:=a4+c4;
+
+  a1hat:=a1+b41;   
+  a2hat:=a2+b42;
+  a3hat:=a3-b43;
+  a4hat:=a4-b44;
+
+  if IsEven(a1) then
+    a1:=a1hat; a2:=a2hat; a3:=a3hat; a4:=a4hat;
+  end if; 
+
+  a1:=IntegerToSequence(a1,2);
+  a2:=IntegerToSequence(a2,2);
+  a3:=IntegerToSequence(a3,2);
+  a4:=IntegerToSequence(a4,2);
+
+  // Padding
+  while #a1 ne 65 do Append(~a1,0); end while;
+  while #a2 ne 65 do Append(~a2,0); end while;
+  while #a3 ne 65 do Append(~a3,0); end while;
+  while #a4 ne 65 do Append(~a4,0); end while;
+
+  return a1,a2,a3,a4;
+
+end function;
+
+/*
+The recoding described in Algorithm 1. The "if" statements are for
+ simplicity in Magma. In the C code the "if" statement are turned into constant-time maskings.
+Input: the multiscalar (a1,a2,a3,a4) output from the decomposition function above. 
+Output: the indexes (d0,...,d64) and sign masks (m0,...,m64)
+*/
+recode:=function(a1,a2,a3,a4)
+
+  a:=[a1,a2,a3,a4];
+  b:=[[0: i in [1..65]]: j in [1..4]];
+
+  b[1][65]:=1;
+
+  for i:=1 to 65 do
+    if i ne 65 then
+      b[1][i]:=2*a[1][i+1]-1;
+    end if;
+    for j:=2 to 4 do
+      b[j][i]:=b[1][i]*a[j][1];
+      aj:=SequenceToInteger(a[j],2);
+      aj:=Floor(aj div 2)-Floor(b[j][i] div 2);
+      if aj ne 0 then 
+        a[j]:=IntegerToSequence(aj,2);
+      else
+        a[j]:=[0];
+      end if;
+    end for;
+  end for;
+
+  m:=b[1];
+  d:=[];
+  for i:=1 to 65 do
+    Append(~d,SequenceToInteger([Abs(b[2][i]),Abs(b[3][i]),Abs(b[4][i])],2)+1);
+  end for;
+
+  return m,d;
+
+end function;
+
+/*
+Building the lookup table as described in Section 5.2 and the proof of Theorem 1. 
+input: P, phi(P), psi(P) and psi(phi(P))
+output: the lookup table of size 8
+*/
+lookup_table:=function(P,phiP,psiP,psiphiP,Fp2_ops)
+    
+  T:=[];              
+  Append(~T,[P[1],P[2],P[3],P[4]]); //T[1]
+
+  t0,Fp2_ops:=ADD_core(phiP,T[1],Fp2_ops);
+  t0,Fp2_ops:=R1toR2(t0,Fp2_ops);
+  Append(~T,t0);         //T[2]
+
+  t0,Fp2_ops:=ADD_core(psiP,T[1],Fp2_ops);
+  t0,Fp2_ops:=R1toR2(t0,Fp2_ops);
+  Append(~T,t0);         //T[3]
+
+  t0,Fp2_ops:=ADD_core(psiP,T[2],Fp2_ops);
+  t0,Fp2_ops:=R1toR2(t0,Fp2_ops);
+  Append(~T,t0);         //T[4]
+
+  t0,Fp2_ops:=ADD_core(psiphiP,T[1],Fp2_ops);
+  t0,Fp2_ops:=R1toR2(t0,Fp2_ops);
+  Append(~T,t0);         //T[5]
+
+  t0,Fp2_ops:=ADD_core(psiphiP,T[2],Fp2_ops);
+  t0,Fp2_ops:=R1toR2(t0,Fp2_ops);
+  Append(~T,t0);         //T[6]
+
+  t0,Fp2_ops:=ADD_core(psiphiP,T[3],Fp2_ops);
+  t0,Fp2_ops:=R1toR2(t0,Fp2_ops);
+  Append(~T,t0);         //T[7]
+
+  t0,Fp2_ops:=ADD_core(psiphiP,T[4],Fp2_ops);
+  t0,Fp2_ops:=R1toR2(t0,Fp2_ops);
+  Append(~T,t0);         //T[8]
+
+  return T,Fp2_ops;
+
+end function;
+
+/*
+The regular four-dimensional scalar multiplication described in Algorithm 2. 
+*/
+scalar_multiplication:=function(P,m)
+
+  Fp2_ops:=[0,0,0]; 
+
+  // Step 1 - Compute endomorphisms:
+  phiP,Fp2_ops:=phi(P,Fp2_ops);
+  psiP,Fp2_ops:=psi(P,Fp2_ops);
+  psiphiP,Fp2_ops:=psi(phiP,Fp2_ops);
+
+  // Step 2 - Precompute lookup table:
+  P,Fp2_ops:=R1toR2(P,Fp2_ops);
+  phiP,Fp2_ops:=R1toR3(phiP,Fp2_ops);
+  psiP,Fp2_ops:=R1toR3(psiP,Fp2_ops);
+  psiphiP,Fp2_ops:=R1toR3(psiphiP,Fp2_ops);
+  T,Fp2_ops:=lookup_table(P,phiP,psiP,psiphiP,Fp2_ops);
+
+  // Step 3 - Scalar decomposition:
+  a1,a2,a3,a4:=decomposition(m);
+
+  // Step 4 - Scalar recoding:
+  masks,indexes:=recode(a1,a2,a3,a4);
+ 
+  // Step 5 - Initialize
+  Q:=T[indexes[65]];
+  Q,Fp2_ops:=negate_and_select(Q,masks[65],Fp2_ops);
+  Q,Fp2_ops:=R2toR4(Q,Fp2_ops);
+
+  // Steps 6,7,8 - Main loop:
+  for i:=64 to 1 by -1 do
+    Q,Fp2_ops:=DBL(Q,Fp2_ops);
+    Ti:=T[indexes[i]];
+    Ti,Fp2_ops:=negate_and_select(Ti,masks[i],Fp2_ops);
+    Q,Fp2_ops:=ADD(Q,Ti,Fp2_ops);
+  end for;
+
+  // Step 9 - Normalize output:
+  Q[3]:=1/Q[3];   
+  Q[1]:=Q[1]*Q[3]; Fp2_ops[1]+:=1;
+  Q[2]:=Q[2]*Q[3]; Fp2_ops[1]+:=1;
+
+  return E![Q[1],Q[2]],Fp2_ops;
+
+end function;
+
+
+// Testing and illustrating the operation count in Theorem 1.
+
+while true do
+
+  P:=RandomNTorstionPoint();
+  m:=Random(0,mu-1);
+
+  mP:=GenericScalarMult(E![P[1]/P[3],P[2]/P[3]],m);
+  compare:=E![mP[1]/mP[3],mP[2]/mP[3]];
+
+  Q,Fp2_ops:=scalar_multiplication(P,m);
+
+  if (Q eq compare) then
+    "PASSED: ", 1, "Fp2 invs", Fp2_ops[1], "Fp2 muls", Fp2_ops[2], "Fp2 sqrs", Fp2_ops[3], "Fp2 add";
+  else
+    "FAILED"; break;
+  end if;
+
+end while;
+
