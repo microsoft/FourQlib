@@ -8,7 +8,7 @@ The `FourQ_ARM` folder contains:
 * [`FourQ_ARM/makefile`](makefile): Makefile for compilation on ARM processors (ARMv6 and ARMv7) using GNU GCC on Linux.
 * [`FourQ_ARM/makefile_Cortex-M4`](makefile_Cortex-M4): Makefile for compilation on ARM Cortex-M4 (STM32F4xx series) using GNU GCC on Linux.
 * Main .c and .h files: library and header files. Public API for ECC scalar multiplication, key exchange and signatures is in [`FourQ_ARM/FourQ_api.h`](FourQ_api.h).        
-* [`FourQ_ARM/ARM/`](generic/): folder with library files implementing low-level arithmetic for ARM.
+* [`FourQ_ARM/ARM/`](ARM/): folder with library files implementing low-level arithmetic for ARM.
 * [`FourQ_ARM/libopencm3/`](libopencm3/): folder with firmware library files for ARM Cortex-M microcontrollers.
 * [`FourQ_ARM/random/`](random/): folder with pseudo-random generation function for ARM Cortex-M4.
 * [`FourQ_ARM/tests/`](tests/): test files for 32-bit ARM.
