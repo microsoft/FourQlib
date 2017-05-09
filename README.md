@@ -115,7 +115,7 @@ Available [`here`](https://www.ietf.org/id/draft-ladd-cfrg-4q-01.txt).
 Preprint available [`here`](http://eprint.iacr.org/2016/645).
 
 [5]   Zhe Liu, Patrick Longa, Geovandro Pereira, Oscar Reparaz and Hwajeong Seo, "FourQ on embedded devices with strong countermeasures against side-channel attacks".
-Preprint available [`here`](http://eprint.iacr.org/2016/645).
+Preprint to be available soon.
 
 # Contributing
 
