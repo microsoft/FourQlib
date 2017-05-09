@@ -10,7 +10,7 @@ The `FourQ_ARM_side_channel` folder contains:
 using GNU GCC on Linux.
 * Main .c and .h files: library and header files. Public API for ECC scalar multiplication, key exchange and signatures is in 
 [`FourQ_ARM_side_channel/FourQ_api.h`](FourQ_api.h).        
-* [`FourQ_ARM_side_channel/ARM/`](generic/): folder with library files implementing low-level arithmetic for ARM.
+* [`FourQ_ARM_side_channel/ARM/`](ARM/): folder with library files implementing low-level arithmetic for ARM.
 * [`FourQ_ARM_side_channel/libopencm3/`](libopencm3/): folder with firmware library files for ARM Cortex-M microcontrollers.
 * [`FourQ_ARM_side_channel/random/`](random/): folder with pseudo-random generation function for ARM Cortex-M4.
 * [`FourQ_ARM_side_channel/tests/`](tests/): test files for 32-bit ARM.
