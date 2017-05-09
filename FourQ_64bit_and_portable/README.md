@@ -4,18 +4,18 @@
 
 The `FourQ_64bit_and_portable` folder contains:
 
-* [`FourQ_64bit_and_portable/Visual Studio/`](FourQ_64bit_and_portable/Visual%20Studio/): folder with Visual Studio 2015 solution and 
+* [`FourQ_64bit_and_portable/Visual Studio/`](Visual%20Studio/): folder with Visual Studio 2015 solution and 
 project files for compilation and testing in Windows.
-* [`FourQ_64bit_and_portable/makefile`](FourQ_64bit_and_portable/makefile): Makefile for compilation using GNU GCC or clang compilers 
+* [`FourQ_64bit_and_portable/makefile`](makefile): Makefile for compilation using GNU GCC or clang compilers 
 on Linux. 
 * Main .c and .h files: library and header files. Public API for ECC scalar multiplication, key exchange and signatures is in 
-[`FourQ_64bit_and_portable/FourQ_api.h`](FourQ_64bit_and_portable/FourQ_api.h).        
-* [`FourQ_64bit_and_portable/AMD64/`](FourQ_64bit_and_portable/AMD64/): folder with library files for optimized x64 implementation.
-* [`FourQ_64bit_and_portable/ARM64/`](FourQ_64bit_and_portable/ARM64/): folder with library files for optimized 64-bit ARM 
+[`FourQ_64bit_and_portable/FourQ_api.h`](FourQ_api.h).        
+* [`FourQ_64bit_and_portable/AMD64/`](AMD64/): folder with library files for optimized x64 implementation.
+* [`FourQ_64bit_and_portable/ARM64/`](ARM64/): folder with library files for optimized 64-bit ARM 
 implementation.
-* [`FourQ_64bit_and_portable/generic/`](FourQ_64bit_and_portable/generic/): folder with library files for portable implementation.
-* [`FourQ_64bit_and_portable/tests/`](FourQ_64bit_and_portable/tests/): test files.
-* [`FourQ_64bit_and_portable/README.md`](FourQ_64bit_and_portable/README.md): this readme file.
+* [`FourQ_64bit_and_portable/generic/`](generic/): folder with library files for portable implementation.
+* [`FourQ_64bit_and_portable/tests/`](tests/): test files.
+* [`FourQ_64bit_and_portable/README.md`](README.md): this readme file.
 
 ## Supported platforms
 
@@ -31,8 +31,8 @@ Random values are generated with `/dev/urandom` in the case of Linux, and with t
 
 The library includes an implementation of SHA-512 which is used by default by SchnorrQ signatures.
 
-Users can experiment with different options by replacing functions in the [`random`](random/) and [`sha512`](sha512/) folders and 
-applying the corresponding changes to the settings in [`FourQ.h`](FourQ_64bit_and_portable/FourQ.h). 
+Users can experiment with different options by replacing functions in the `random` and `sha512` folders and 
+applying the corresponding changes to the settings in [`FourQ.h`](FourQ.h). 
 
 ## Implementation options
 
@@ -52,7 +52,7 @@ Follow the instructions below to configure these different options.
 
 ### Building the library with Visual Studio
 
-Open the solution file ([`FourQ.sln`](FourQ_64bit_and_portable/Visual%20Studio/FourQ/FourQ.sln)) in Visual Studio 2015, select 
+Open the solution file ([`FourQ.sln`](Visual%20Studio/FourQ/FourQ.sln)) in Visual Studio 2015, select 
 one of the available configurations from
 the Solution Configurations menu ("Release" corresponding to the high-speed x64 implementation and "Generic" 
 corresponding to the portable implementation) and select one of the Solution Platforms (x64 or Win32). Note 
@@ -72,8 +72,7 @@ After building the solution, run `fp_tests.exe`, `ecc_tests.exe` and `crypto_tes
 ### Using the library
 
 After building the solution, add the `FourQ.lib` file to the set of References for a project, and add 
-[`FourQ.h`](FourQ_64bit_and_portable/FourQ.h) and [`FourQ_api.h`](FourQ_64bit_and_portable\FourQ_api.h) to the list of 
-header files of a project.
+[`FourQ.h`](FourQ.h) and [`FourQ_api.h`](FourQ_api.h) to the list of header files of a project.
 
 ## Instructions for Linux
 
