@@ -80,7 +80,7 @@ First, install the ARM GNU GCC cross-compiler on the server machine:
 
 ```sh
 $ sudo apt-get install gcc-arm-none-eabi libc6-dev-i386
-$
+```
 
 Then, download, build and install [`stlink`](https://github.com/texane/stlink).
 
