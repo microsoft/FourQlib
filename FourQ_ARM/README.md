@@ -5,19 +5,19 @@
 
 The `FourQ_ARM` folder contains:
 
-* [`FourQ_ARM/makefile`](FourQ_ARM/makefile): Makefile for compilation on ARM processors (ARMv6 and ARMv7) using GNU GCC on Linux.
-* [`FourQ_ARM/makefile_Cortex-M4`](FourQ_ARM/makefile_Cortex-M4): Makefile for compilation on ARM Cortex-M4 (STM32F4xx series) using GNU GCC on Linux.
-* Main .c and .h files: library and header files. Public API for ECC scalar multiplication, key exchange and signatures is in [`FourQ_ARM/FourQ_api.h`](FourQ_ARM/FourQ_api.h).        
-* [`FourQ_ARM/ARM/`](FourQ_ARM/generic/): folder with library files implementing low-level arithmetic for ARM.
-* [`FourQ_ARM/libopencm3/`](FourQ_ARM/libopencm3/): folder with firmware library files for ARM Cortex-M microcontrollers.
-* [`FourQ_ARM/random/`](FourQ_ARM/random/): folder with pseudo-random generation function for ARM Cortex-M4.
-* [`FourQ_ARM/tests/`](FourQ_ARM/tests/): test files for 32-bit ARM.
-* [`FourQ_ARM/tests_Cortex-M4/`](FourQ_ARM/tests_Cortex-M4/): test files for ARM Cortex-M4.
-* [`FourQ_ARM/README.md`](FourQ_ARM/README.md): this readme file.
+* [`FourQ_ARM/makefile`](makefile): Makefile for compilation on ARM processors (ARMv6 and ARMv7) using GNU GCC on Linux.
+* [`FourQ_ARM/makefile_Cortex-M4`](makefile_Cortex-M4): Makefile for compilation on ARM Cortex-M4 (STM32F4xx series) using GNU GCC on Linux.
+* Main .c and .h files: library and header files. Public API for ECC scalar multiplication, key exchange and signatures is in [`FourQ_ARM/FourQ_api.h`](FourQ_api.h).        
+* [`FourQ_ARM/ARM/`](generic/): folder with library files implementing low-level arithmetic for ARM.
+* [`FourQ_ARM/libopencm3/`](libopencm3/): folder with firmware library files for ARM Cortex-M microcontrollers.
+* [`FourQ_ARM/random/`](random/): folder with pseudo-random generation function for ARM Cortex-M4.
+* [`FourQ_ARM/tests/`](tests/): test files for 32-bit ARM.
+* [`FourQ_ARM/tests_Cortex-M4/`](tests_Cortex-M4/): test files for ARM Cortex-M4.
+* [`FourQ_ARM/README.md`](README.md): this readme file.
 
 `stm32f4_wrapper.c` and `stm32f4_wrapper.h` are by Joost Rijneveld and can be found [`here`](https://github.com/joostrijneveld/STM32-getting-started).
 
-Files in the [`libopencm3`](FourQ_ARM/libopencm3/) are from the [libopencm3 project](https://github.com/libopencm3/libopencm3).
+Files in the [`libopencm3`](FourQ_ARM/libopencm3/) folder are from the [libopencm3 project](https://github.com/libopencm3/libopencm3).
 
 ## Supported platforms
 
@@ -37,7 +37,7 @@ Random values are generated with `/dev/urandom` in the case of the 32-bit ARM im
   
 The library includes an implementation of SHA-512 which is used by default by SchnorrQ signatures.
 
-Users can experiment with different options by replacing functions in the [`random`](random/), [`FourQ_ARM/random/`](FourQ_ARM/random/) and [`sha512`](sha512/) folders and applying the corresponding changes to the settings in [`FourQ.h`](FourQ_ARM/FourQ.h). 
+Users can experiment with different options by replacing functions in the `random`, `FourQ_ARM/random` and `sha512` folders and applying the corresponding changes to the settings in [`FourQ.h`](FourQ.h). 
 
 ## Instructions
 
