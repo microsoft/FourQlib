@@ -6,7 +6,7 @@ The `FourQ_32bit` folder contains:
 
 * [`FourQ_32bit/Visual Studio/`](FourQ_32bit/Visual%20Studio/): folder with Visual Studio 2015 solution and project files for compilation and testing in Windows.
 * [`FourQ_32bit/makefile`](FourQ_32bit/makefile): Makefile for compilation using GNU GCC or clang compilers on Linux. 
-* Main .c and .h files: library and header files. Public API for ECC scalar multiplication, key exchange and signatures is in [`FourQ_32bit\FourQ_api.h`](FourQ_32bit\FourQ_api.h).        
+* Main .c and .h files: library and header files. Public API for ECC scalar multiplication, key exchange and signatures is in [`FourQ_32bit/FourQ_api.h`](FourQ_32bit/FourQ_api.h).        
 * [`FourQ_32bit/generic/`](FourQ_32bit/generic/): folder with library files for 32-bit implementation.
 * [`FourQ_32bit/tests/`](FourQ_32bit/tests/): test files.
 * [`FourQ_32bit/README.md`](FourQ_32bit/README.md): this readme file.
