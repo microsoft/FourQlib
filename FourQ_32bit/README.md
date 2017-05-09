@@ -4,12 +4,12 @@
 
 The `FourQ_32bit` folder contains:
 
-* [`FourQ_32bit/Visual Studio/`](FourQ_32bit/Visual%20Studio/): folder with Visual Studio 2015 solution and project files for compilation and testing in Windows.
-* [`FourQ_32bit/makefile`](FourQ_32bit/makefile): Makefile for compilation using GNU GCC or clang compilers on Linux. 
-* Main .c and .h files: library and header files. Public API for ECC scalar multiplication, key exchange and signatures is in [`FourQ_32bit/FourQ_api.h`](FourQ_32bit/FourQ_api.h).        
-* [`FourQ_32bit/generic/`](FourQ_32bit/generic/): folder with library files for 32-bit implementation.
-* [`FourQ_32bit/tests/`](FourQ_32bit/tests/): test files.
-* [`FourQ_32bit/README.md`](FourQ_32bit/README.md): this readme file.
+* [`FourQ_32bit/Visual Studio/`](Visual%20Studio/): folder with Visual Studio 2015 solution and project files for compilation and testing in Windows.
+* [`FourQ_32bit/makefile`](makefile): Makefile for compilation using GNU GCC or clang compilers on Linux. 
+* Main .c and .h files: library and header files. Public API for ECC scalar multiplication, key exchange and signatures is in [`FourQ_32bit/FourQ_api.h`](FourQ_api.h).        
+* [`FourQ_32bit/generic/`](generic/): folder with library files for 32-bit implementation.
+* [`FourQ_32bit/tests/`](tests/): test files.
+* [`FourQ_32bit/README.md`](README.md): this readme file.
 
 ## Supported platforms
 
@@ -23,14 +23,14 @@ Random values are generated with `/dev/urandom` in the case of Linux, and with t
 
 The library includes an implementation of SHA-512 which is used by default by SchnorrQ signatures.
 
-Users can experiment with different options by replacing functions in the [`random`](random/) and [`sha512`](sha512/) folders and 
-applying the corresponding changes to the settings in [`FourQ.h`](FourQ_32bit/FourQ.h). 
+Users can experiment with different options by replacing functions in the `random` and `sha512` folders and 
+applying the corresponding changes to the settings in [`FourQ.h`](FourQ.h). 
 
 ## Instructions for Windows
 
 ### Building the library with Visual Studio
 
-Open the solution file ([`FourQ.sln`](FourQ_32bit/Visual%20Studio/FourQ/FourQ.sln)) in Visual Studio 2015, select the "Generic" configurations from the Solution Configurations menu (Win32 should appear as Solution Platform). 
+Open the solution file ([`FourQ.sln`](Visual%20Studio/FourQ/FourQ.sln)) in Visual Studio 2015, select the "Generic" configurations from the Solution Configurations menu (Win32 should appear as Solution Platform). 
 
 By default, `USE_ENDO=true` is defined. To modify this configuration, go to the property window of the FourQ project, go to `Configuration Properties > C/C++ > Preprocessor`. Make any suitable changes, e.g., `USE_ENDO=true` or `false`. Repeat these steps for the `fp_tests`, `ecc_tests` and `crypto_tests` projects.
 
@@ -42,7 +42,7 @@ After building the solution, run `fp_tests.exe`, `ecc_tests.exe` and `crypto_tes
 
 ### Using the library
 
-After building the solution, add the `FourQ.lib` file to the set of References for a project, and add [`FourQ.h`](FourQ_32bit/FourQ.h) and [`FourQ_api.h`](FourQ_32bit\FourQ_api.h) to the list of header files of a project.
+After building the solution, add the `FourQ.lib` file to the set of References for a project, and add [`FourQ.h`](FourQ.h) and [`FourQ_api.h`](FourQ_api.h) to the list of header files of a project.
 
 ## Instructions for Linux
 
