@@ -1,5 +1,4 @@
-# FourQlib v3.0 (C Edition)
-# 32-bit implementation
+# FourQlib v3.0 (C Edition): portable 32-bit implementation
 
 ## Contents
 
