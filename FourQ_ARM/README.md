@@ -17,7 +17,7 @@ The `FourQ_ARM` folder contains:
 
 `stm32f4_wrapper.c` and `stm32f4_wrapper.h` are by Joost Rijneveld and can be found [`here`](https://github.com/joostrijneveld/STM32-getting-started).
 
-Files in the [`libopencm3`](FourQ_ARM/libopencm3/) folder are from the [libopencm3 project](https://github.com/libopencm3/libopencm3).
+Files in the [`libopencm3`](libopencm3/) folder are from the [libopencm3 project](https://github.com/libopencm3/libopencm3).
 
 ## Supported platforms
 
