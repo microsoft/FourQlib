@@ -1,4 +1,5 @@
-# FourQlib v3.0 (C Edition): optimized implementation for 32-bit ARM and ARM Cortex-M4
+# FourQlib v3.0 (C Edition): 
+# Optimized implementation for 32-bit ARM and ARM Cortex-M4
 
 ## Contents
 
@@ -14,7 +15,7 @@ The `FourQ_ARM` folder contains:
 * [`FourQ_ARM/tests_Cortex-M4/`](FourQ_ARM/tests_Cortex-M4/): test files for ARM Cortex-M4.
 * [`FourQ_ARM/README.md`](FourQ_ARM/README.md): this readme file.
 
-`stm32f4_wrapper.c` and `stm32f4_wrapper.h` are by Joost Rijneveld and can be found [`here`]().
+`stm32f4_wrapper.c` and `stm32f4_wrapper.h` are by Joost Rijneveld and can be found [`here`](https://github.com/joostrijneveld/STM32-getting-started).
 
 Files in the [`libopencm3`](FourQ_ARM/libopencm3/) are from the [libopencm3 project](https://github.com/libopencm3/libopencm3).
 
