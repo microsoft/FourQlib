@@ -47,21 +47,21 @@ Refer to [2] for the security requirements for the cryptographic hash function.
 * Support for the SchnorrQ digital signature scheme [2]. 
 * Support for 3 core elliptic curve operations: variable-base, fixed-base and double-scalar multiplications.
 * Support for Windows using Microsoft Visual Studio and Linux using GNU GCC or clang.    
-* Basic implementation using portable C to enable support on a wide range of platforms including x64, x86 
+* Includes a basic implementation using portable C to enable support on a wide range of platforms including x64, x86 
   and ARM, Windows and Linux. 
-* Optimized implementations for 64-bit ARMv8 and x64 platforms with optional, high-performance x64 assembly for Linux [1].
-* High-performance implementations for 32-bit ARM processors with NEON support [4], for 32-bit ARMv6 and 
-  ARMv7 processors, and for 32-bit ARM Cortex-M4 microcontroller [5].
-* Side-channel secure implementation for 32-bit ARMv6/ARMv7 and for ARMv7-M (Cortex-M4) microcontroller [5].
-* Testing and benchmarking code for field arithmetic, elliptic curve and cryptographic functions. 
+* Includes pptimized implementations for 64-bit ARMv8 and x64 platforms with optional, high-performance x64 assembly for Linux [1].
+* Includes high-performance implementations for 32-bit ARM processors with NEON support [4], for 32-bit ARMv6 and 
+  ARMv7 processors, and for 32-bit ARM Cortex-M4 microcontrollers [5].
+* Includes side-channel secure implementations for 32-bit ARMv6/ARMv7 and for ARMv7-M (Cortex-M4) microcontrollers [5].
+* Includes testing and benchmarking code for field arithmetic, elliptic curve and cryptographic functions. 
 * All functions evaluating secret data have regular, constant-time execution, protecting against timing and cache attacks.
-* Option to disable the use of the fast endomorphisms.
+* Includes an option to disable the use of the fast endomorphisms.
 
 ## Quick start
 
 ### Building the library and executing the tests on Linux
     
-One can quickly test a given implementation by executing from the corresponding folder (using a supported targeted architecture):
+One can quickly test a given implementation by executing from the corresponding folder and using a supported architecture:
 
 ```sh
 $ make ARCH=[x64/x86/ARM/ARM64] 
