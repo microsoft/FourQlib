@@ -49,7 +49,7 @@ Refer to [2] for the security requirements for the cryptographic hash function.
 * Support for Windows using Microsoft Visual Studio and Linux using GNU GCC or clang.    
 * Includes a basic implementation using portable C to enable support on a wide range of platforms including x64, x86 
   and ARM, Windows and Linux. 
-* Includes pptimized implementations for 64-bit ARMv8 and x64 platforms with optional, high-performance x64 assembly for Linux [1].
+* Includes optimized implementations for 64-bit ARMv8 and x64 platforms with optional, high-performance x64 assembly for Linux [1].
 * Includes high-performance implementations for 32-bit ARM processors with NEON support [4], for 32-bit ARMv6 and 
   ARMv7 processors, and for 32-bit ARM Cortex-M4 microcontrollers [5].
 * Includes side-channel secure implementations for 32-bit ARMv6/ARMv7 and for ARMv7-M (Cortex-M4) microcontrollers [5].
