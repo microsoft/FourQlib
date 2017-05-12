@@ -1,6 +1,23 @@
 # FourQlib v3.0 (C Edition): 
 # Optimized implementation for 32-bit ARM and ARM Cortex-M4 with side-channel countermeasures
  
+This implementation includes scalar multiplication, ECDH and digital signature algorithms protected with a set of efficient
+countermeasures that have been especially tailored for FourQ to minimize the risk of timing attacks, simple and differential 
+side-channel analysis (SSCA/DSCA), correlation and collision attacks, including specialized attacks such the doubling attack, 
+the refined power attack (RPA), zero-value point attacks (ZVP), same value attacks (SVA), exceptional procedure attacks, invalid 
+point attacks, and small subgroup attacks. 
+
+More details can be found in: "FourQ on embedded devices with strong countermeasures against side-channel attacks", by Zhe Liu, 
+Patrick Longa, Geovandro Pereira, Oscar Reparaz, and Hwajeong Seo. Preprint to be available soon.
+
+**SECURITY NOTE:** no software implementation is able to guarantee 100% side-channel security. In some cases, certain powerful attacks 
+such as template attacks can be carried out using a single target trace, making any randomization or masking technique useless.
+Moreover, the issue gets more complicated for embedded devices that lack access to a good source of randomness. Since many SCA attacks
+closely depend on the underlying hardware, it is recommended to include additional countermeasures at the software and hardware levels
+depending on the targeted platform. Also, note that hardware countermeasures are usually required to properly deal with most
+sophisticated invasive attacks.                                                          
+Finally, note that the hash function implementation used by SchnorrQ is not protected against side-channel attacks.
+ 
 ## Contents
 
 The `FourQ_ARM_side_channel` folder contains:
@@ -124,3 +141,12 @@ $ st-flash write tests_Cortex-M4/crypto_tests.bin 0x8000000
 ```
 
 The tests should begin to run on the first terminal window.
+
+## Additional side-channel countermeasure
+
+Some attacks try to target potential leakage when manipulating precomputed values during the scalar multiplication. 
+To increase the resilience against this class of attacks, it is recommended to randomize the full table before extracting a point.
+
+This countermeasure can be enabled in the implementation by uncommenting ``#define FULL_TABLE_RANDOMIZATION`` in [`FourQ.h`](FourQ.h). 
+
+Note that this countermeasure is relatively expensive, so there is a security/performance trade-off to consider.
