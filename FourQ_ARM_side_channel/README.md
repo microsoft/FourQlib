@@ -7,8 +7,11 @@ side-channel analysis (SSCA/DSCA), correlation and collision attacks, including 
 the refined power attack (RPA), zero-value point attacks (ZVP), same value attacks (SVA), exceptional procedure attacks, invalid 
 point attacks, and small subgroup attacks. 
 
-More details can be found in: "FourQ on embedded devices with strong countermeasures against side-channel attacks", by Zhe Liu, 
-Patrick Longa, Geovandro Pereira, Oscar Reparaz, and Hwajeong Seo. Preprint to be available soon.
+More details can be found in: 
+
+"FourQ on embedded devices with strong countermeasures against side-channel attacks".                         
+Zhe Liu, Patrick Longa, Geovandro Pereira, Oscar Reparaz, and Hwajeong Seo.                            
+Preprint to be available soon.
 
 **SECURITY NOTE:** no software implementation is able to guarantee 100% side-channel security. In some cases, certain powerful attacks 
 such as template attacks can be carried out using a single target trace, making any randomization or masking technique useless.
