@@ -84,7 +84,7 @@ $ make ARCH=x64
 
 Additional compilation options are available. Refer to the `README` files in a given implementation folder for complete details.
 
-**NOTE:** the above instructions apply to all the "processor-class" implementations. For instructions on how to compile on an Cortex-M (ARMv7-M) microcontroller, refer to the `README` files in [`FourQ_ARM_side_channel`](FourQ_ARM_side_channel/) or [`FourQ_ARM`](FourQ_ARM/).  
+**NOTE:** the above instructions apply to all the "processor-class" implementations. For instructions on how to compile on an ARM Cortex-M (ARMv7-M) microcontroller, refer to the `README` files in [`FourQ_ARM_side_channel`](FourQ_ARM_side_channel/) or [`FourQ_ARM`](FourQ_ARM/).  
 	  
 ### Building the library and executing the tests on Windows
 
