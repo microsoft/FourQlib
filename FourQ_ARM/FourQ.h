@@ -85,6 +85,14 @@ extern "C" {
     #define NO_CACHE_MEM
 #endif
 
+#if defined(_DISABLE_CACHE_MEM_)          // Functions to enable and disable the data cache memory are intended for STM32F4 MCUs    
+    #define ENABLE_CACHE        flash_dcache_enable()
+    #define DISABLE_CACHE       flash_dcache_disable()
+#else  
+    #define ENABLE_CACHE
+    #define DISABLE_CACHE
+#endif
+
 
 // Basic parameters for variable-base scalar multiplication (without using endomorphisms)
 #define W_VARBASE             5 
