@@ -1,0 +1,68 @@
+####  Makefile for compilation using GNU GCC on ARM-based Cortex-M4 microcontroller  ####
+
+OPT=-Ofast     # Optimization option by default
+
+USE_ENDOMORPHISMS=-D USE_ENDO
+ifeq "$(USE_ENDO)" "FALSE"
+    USE_ENDOMORPHISMS=
+endif
+
+INLINING_SETTINGS=-finline-functions -finline-limit=100
+LDSCRIPT = stm32f407x6.ld
+CC=gcc
+PREFIX	= arm-none-eabi
+ARMCC	= $(PREFIX)-$(CC)
+
+ARCH_FLAGS  = -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -MD -DSTM32F4
+CFLAGS		= -c $(OPT) $(ADDITIONAL_SETTINGS) -D _ARM_ -D __LINUX__ -D _NO_CACHE_MEM_ -D _DISABLE_CACHE_MEM_ $(USE_ENDOMORPHISMS) $(INLINING_SETTINGS) \
+	          -I./libopencm3/include -fno-common 
+LDFLAGS		+= --static -Wl,--start-group -lc -lgcc -lnosys -Wl,--end-group -T$(LDSCRIPT) -nostartfiles -Wl,--gc-sections $(ARCH_FLAGS)
+
+OBJECTS=eccp2.o eccp2_no_endo.o fp2_1271_arm_Cortex-M4.o crypto_util.o schnorrq.o kex.o sha512.o test_extras.o random_Cortex-M4.o stm32f4_wrapper.o 
+
+all: lib tests_Cortex-M4/crypto_tests.bin tests_Cortex-M4/ecc_tests.bin tests_Cortex-M4/fp_tests.bin
+	
+lib: $(OBJECTS)
+	 $(PREFIX)-ar cr tests_Cortex-M4/libfourq.a $(OBJECTS)
+
+tests_Cortex-M4/crypto_tests.bin: tests_Cortex-M4/crypto_tests.elf
+	$(PREFIX)-objcopy -Obinary tests_Cortex-M4/crypto_tests.elf tests_Cortex-M4/crypto_tests.bin
+
+tests_Cortex-M4/ecc_tests.bin: tests_Cortex-M4/ecc_tests.elf
+	$(PREFIX)-objcopy -Obinary tests_Cortex-M4/ecc_tests.elf tests_Cortex-M4/ecc_tests.bin
+
+tests_Cortex-M4/fp_tests.bin: tests_Cortex-M4/fp_tests.elf
+	$(PREFIX)-objcopy -Obinary tests_Cortex-M4/fp_tests.elf tests_Cortex-M4/fp_tests.bin
+
+tests_Cortex-M4/crypto_tests.elf: crypto_tests.o $(LDSCRIPT) tests_Cortex-M4/libfourq.a 
+	$(ARMCC) -o tests_Cortex-M4/crypto_tests.elf crypto_tests.o tests_Cortex-M4/libfourq.a $(LDFLAGS) libopencm3/lib/libopencm3_stm32f4.a
+
+tests_Cortex-M4/ecc_tests.elf: ecc_tests.o $(LDSCRIPT) tests_Cortex-M4/libfourq.a 
+	$(ARMCC) -o tests_Cortex-M4/ecc_tests.elf ecc_tests.o tests_Cortex-M4/libfourq.a $(LDFLAGS) libopencm3/lib/libopencm3_stm32f4.a
+
+tests_Cortex-M4/fp_tests.elf: fp_tests.o $(LDSCRIPT) tests_Cortex-M4/libfourq.a 
+	$(ARMCC) -o tests_Cortex-M4/fp_tests.elf fp_tests.o tests_Cortex-M4/libfourq.a $(LDFLAGS) libopencm3/lib/libopencm3_stm32f4.a
+
+%.o: %.c 
+	$(ARMCC) $(CFLAGS) $(ARCH_FLAGS) -o $@ -c $<
+
+%.o: tests_Cortex-M4/%.c 
+	$(ARMCC) $(CFLAGS) $(ARCH_FLAGS) -o $@ -c $<
+
+%.o: random/%.c 
+	$(ARMCC) $(CFLAGS) $(ARCH_FLAGS) -o $@ -c $<
+
+%.o: ../sha512/%.c 
+	$(ARMCC) $(CFLAGS) $(ARCH_FLAGS) -o $@ -c $<
+
+%.o: ARM/%.S 
+	$(ARMCC) $(CFLAGS) $(ARCH_FLAGS) -o $@ -c $<
+
+stm32f4_wrapper.o: stm32f4_wrapper.c
+	$(ARMCC) $(CFLAGS) $(ARCH_FLAGS) -Wno-overflow -o $@ -c $<
+
+.PHONY: clean
+
+clean:
+	rm -f *.d  *.o tests_Cortex-M4/*.o tests_Cortex-M4/*.d tests_Cortex-M4/*.a tests_Cortex-M4/*.bin tests_Cortex-M4/*.elf 
+
