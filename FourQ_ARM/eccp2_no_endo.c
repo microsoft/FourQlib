@@ -120,6 +120,7 @@ bool ecc_mul(point_t P, digit_t* k, point_t Q, bool clear_cofactor)
     digit_t k_odd[NWORDS_ORDER];
     int i;
 
+    DISABLE_CACHE;
     point_setup(P, R);                                         // Convert to representation (X,Y,1,Ta,Tb)
 
     if (ecc_point_validate(R) == false) {                      // Check if point lies on the curve
