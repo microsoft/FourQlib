@@ -29,10 +29,10 @@ ECCRYPTO_STATUS SchnorrQ_KeyGeneration_SCA_secure(const unsigned char* SecretKey
     unsigned char k[64], SecretBlinding[32];
     ECCRYPTO_STATUS Status = ECCRYPTO_ERROR_UNKNOWN;
 
-	Status = RandomBytesFunction(SecretBlinding, 32);
-	if (Status != ECCRYPTO_SUCCESS) {
-		goto cleanup;
-	}
+    Status = RandomBytesFunction(SecretBlinding, 32);
+    if (Status != ECCRYPTO_SUCCESS) {
+        goto cleanup;
+    }
         
     // Set up an initial "weak" blinding point R
     fp2copy1271((felm_t*)&GENERATOR_x[0], G->x);
@@ -42,30 +42,30 @@ ECCRYPTO_STATUS SchnorrQ_KeyGeneration_SCA_secure(const unsigned char* SecretKey
     eccnorm(S, R);                 
     
     // Computing an initial blinding point. This computation itself is not protected with a secure point blinding
-	Status = ecc_mul_SCA_secure(G, R, (digit_t*)SecretBlinding, (point_affine*)BlindingPoint, false);
-	if (Status != ECCRYPTO_SUCCESS) {
-		goto cleanup;
-	}
+    Status = ecc_mul_SCA_secure(G, R, (digit_t*)SecretBlinding, (point_affine*)BlindingPoint, false);
+    if (Status != ECCRYPTO_SUCCESS) {
+        goto cleanup;
+    }
 
     if (CryptoHashFunction(SecretKey, 32, k) != 0) {   
         Status = ECCRYPTO_ERROR;
         goto cleanup;
     }
 
-	Status = ecc_mul_SCA_secure(G, (point_affine*)BlindingPoint, (digit_t*)k, R, false);  // Compute public key
-	if (Status != ECCRYPTO_SUCCESS) {
-		goto cleanup;
-	}                                      
-	encode(R, PublicKey);                   // Encode public key
+    Status = ecc_mul_SCA_secure(G, (point_affine*)BlindingPoint, (digit_t*)k, R, false);  // Compute public key
+    if (Status != ECCRYPTO_SUCCESS) {
+        goto cleanup;
+    }                                      
+    encode(R, PublicKey);                   // Encode public key
     
 // Cleanup
-	clear_words((unsigned int*)SecretBlinding, 256/(sizeof(unsigned int)*8));
+    clear_words((unsigned int*)SecretBlinding, 256/(sizeof(unsigned int)*8));
     return ECCRYPTO_SUCCESS;
 
 cleanup:
-	clear_words((unsigned int*)SecretBlinding, 256/(sizeof(unsigned int)*8));
-	clear_words((unsigned int*)BlindingPoint, 512/(sizeof(unsigned int)*8));
-	clear_words((unsigned int*)k, 512/(sizeof(unsigned int)*8));
+    clear_words((unsigned int*)SecretBlinding, 256/(sizeof(unsigned int)*8));
+    clear_words((unsigned int*)BlindingPoint, 512/(sizeof(unsigned int)*8));
+    clear_words((unsigned int*)k, 512/(sizeof(unsigned int)*8));
     clear_words((unsigned int*)PublicKey, 256/(sizeof(unsigned int)*8));
 
     return Status;
@@ -79,7 +79,7 @@ ECCRYPTO_STATUS SchnorrQ_FullKeyGeneration_SCA_secure(unsigned char* SecretKey, 
   // Outputs: 32-byte SecretKey, 32-byte PublicKey and 64-byte BlindingPoint
     ECCRYPTO_STATUS Status = ECCRYPTO_ERROR_UNKNOWN;
 
-	Status = RandomBytesFunction(SecretKey, 32);
+    Status = RandomBytesFunction(SecretKey, 32);
     if (Status != ECCRYPTO_SUCCESS) {
         goto cleanup;
     }
@@ -94,7 +94,7 @@ ECCRYPTO_STATUS SchnorrQ_FullKeyGeneration_SCA_secure(unsigned char* SecretKey, 
 cleanup:
     clear_words((unsigned int*)SecretKey, 256/(sizeof(unsigned int)*8));
     clear_words((unsigned int*)PublicKey, 256/(sizeof(unsigned int)*8));
-	clear_words((unsigned int*)BlindingPoint, 512/(sizeof(unsigned int)*8));
+    clear_words((unsigned int*)BlindingPoint, 512/(sizeof(unsigned int)*8));
 
     return Status;
 }
@@ -107,8 +107,9 @@ ECCRYPTO_STATUS SchnorrQ_Sign_SCA_secure(const unsigned char* SecretKey, const u
   // Output: 64-byte Signature and updated BlindingPoint 
     point_t G, R;
     unsigned char k[64], r[64], h[64], *temp = NULL;
-	digit_t* H = (digit_t*)h;
-    digit_t* S = (digit_t*)(Signature+32);
+    digit_t* H = (digit_t*)h;
+    digit_t* S1 = (digit_t*)(Signature+32);
+    digit_t S2[256/(sizeof(digit_t)*8)];
     ECCRYPTO_STATUS Status = ECCRYPTO_ERROR_UNKNOWN;
       
     if (CryptoHashFunction(SecretKey, 32, k) != 0) {   
@@ -118,7 +119,7 @@ ECCRYPTO_STATUS SchnorrQ_Sign_SCA_secure(const unsigned char* SecretKey, const u
     
     temp = (unsigned char*)calloc(1, SizeMessage+64);
     if (temp == NULL) {
-		Status = ECCRYPTO_ERROR_NO_MEMORY;
+        Status = ECCRYPTO_ERROR_NO_MEMORY;
         goto cleanup;
     }
     
@@ -133,10 +134,10 @@ ECCRYPTO_STATUS SchnorrQ_Sign_SCA_secure(const unsigned char* SecretKey, const u
     fp2copy1271((felm_t*)&GENERATOR_x[0], G->x);
     fp2copy1271((felm_t*)&GENERATOR_y[0], G->y);   
     
-	Status = ecc_mul_SCA_secure(G, (point_affine*)BlindingPoint, (digit_t*)r, R, false);  // Also verifies that BlindingPoint is a point on the curve. If not, it fails
+    Status = ecc_mul_SCA_secure(G, (point_affine*)BlindingPoint, (digit_t*)r, R, false);  // Also verifies that BlindingPoint is a point on the curve. If not, it fails
     if (Status != ECCRYPTO_SUCCESS) {
-		goto cleanup;
-	}
+        goto cleanup;
+    }
     encode(R, Signature);                   // Encode lowest 32 bytes of signature
     memmove(temp, Signature, 32);
     memmove(temp+32, PublicKey, 32);
@@ -144,21 +145,33 @@ ECCRYPTO_STATUS SchnorrQ_Sign_SCA_secure(const unsigned char* SecretKey, const u
     if (CryptoHashFunction(temp, SizeMessage+64, h) != 0) {   
         Status = ECCRYPTO_ERROR;
         goto cleanup;
+    }    
+
+    Status = RandomBytesFunction((unsigned char*)S2, 32);
+    if (Status != ECCRYPTO_SUCCESS) {
+        goto cleanup;
     }
-	modulo_order((digit_t*)r, (digit_t*)r);
-	modulo_order(H, H);
-	to_Montgomery((digit_t*)k, S);          // Converting to Montgomery representation
-	to_Montgomery(H, H);                    // Converting to Montgomery representation
-	Montgomery_multiply_mod_order(S, H, S);
-	from_Montgomery(S, S);                  // Converting back to standard representation
-	subtract_mod_order((digit_t*)r, S, S);
-	Status = ECCRYPTO_SUCCESS;
+    modulo_order(S2, S2);
+    subtract_mod_order((digit_t*)k, S2, S1);
+    modulo_order((digit_t*)r, (digit_t*)r);
+    modulo_order(H, H);
+    to_Montgomery(S1, S1);                    // Converting to Montgomery representation
+    to_Montgomery(S2, S2);
+    to_Montgomery(H, H);                      // Converting to Montgomery representation
+    Montgomery_multiply_mod_order(S1, H, S1);
+    Montgomery_multiply_mod_order(S2, H, S2);
+    from_Montgomery(S1, S1);                  // Converting back to standard representation
+    from_Montgomery(S2, S2);                 
+    subtract_mod_order((digit_t*)r, S1, S1);          
+    subtract_mod_order(S1, S2, S1);
+    Status = ECCRYPTO_SUCCESS;
     
 cleanup:
-	if (temp != NULL)
-		free(temp);
+    if (temp != NULL)
+        free(temp);
     clear_words((unsigned int*)k, 512/(sizeof(unsigned int)*8));
-	clear_words((unsigned int*)r, 512/(sizeof(unsigned int)*8));
+    clear_words((unsigned int*)r, 512/(sizeof(unsigned int)*8));
+    clear_words((unsigned int*)S2, 256/(sizeof(unsigned int)*8));
     
     return Status;
 }
@@ -176,18 +189,18 @@ ECCRYPTO_STATUS SchnorrQ_Verify(const unsigned char* PublicKey, const unsigned c
 
     *valid = false;
 
-	temp = (unsigned char*)calloc(1, SizeMessage+64);
-	if (temp == NULL) {
-		Status = ECCRYPTO_ERROR_NO_MEMORY;
-		goto cleanup;
-	}
+    temp = (unsigned char*)calloc(1, SizeMessage+64);
+    if (temp == NULL) {
+        Status = ECCRYPTO_ERROR_NO_MEMORY;
+        goto cleanup;
+    }
 
     if (((PublicKey[15] & 0x80) != 0) || ((Signature[15] & 0x80) != 0) || (Signature[63] != 0) || ((Signature[62] & 0xC0) != 0)) {  // Are bit128(PublicKey) = bit128(Signature) = 0 and Signature+32 < 2^246?
-		Status = ECCRYPTO_ERROR_INVALID_PARAMETER;
-		goto cleanup;
+        Status = ECCRYPTO_ERROR_INVALID_PARAMETER;
+        goto cleanup;
     }
     
-	Status = decode(PublicKey, A);    // Also verifies that A is on the curve. If it is not, it fails  
+    Status = decode(PublicKey, A);    // Also verifies that A is on the curve. If it is not, it fails  
     if (Status != ECCRYPTO_SUCCESS) {
         goto cleanup;                            
     }
@@ -205,8 +218,8 @@ ECCRYPTO_STATUS SchnorrQ_Verify(const unsigned char* PublicKey, const unsigned c
     if (Status != ECCRYPTO_SUCCESS) {                                                
         goto cleanup;
     }
-	
-	encode(A, (unsigned char*)A);
+    
+    encode(A, (unsigned char*)A);
 
     for (i = 0; i < NWORDS_ORDER; i++) {
         if (((digit_t*)A)[i] != ((digit_t*)Signature)[i]) {
@@ -216,8 +229,8 @@ ECCRYPTO_STATUS SchnorrQ_Verify(const unsigned char* PublicKey, const unsigned c
     *valid = true;
 
 cleanup:
-	if (temp != NULL)
-		free(temp);
+    if (temp != NULL)
+        free(temp);
     
     return Status;
 }
