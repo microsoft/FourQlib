@@ -1,6 +1,8 @@
 # FourQlib v3.0 (C Edition): 
 # Optimized implementation for 32-bit ARM and ARM Cortex-M4 with side-channel countermeasures
- 
+
+This is an **experimental** side-channel secure implementation. DO NOT USE AS IS IN PRODUCTION. See the "Security notes" below.  
+
 This implementation includes scalar multiplication, ECDH and digital signature algorithms protected with a set of efficient
 countermeasures that have been especially tailored for FourQ to minimize the risk of timing attacks, simple and differential 
 side-channel analysis (SSCA/DSCA), correlation and collision attacks, including specialized attacks such the doubling attack, 
@@ -13,13 +15,14 @@ More details can be found in:
 Zhe Liu, Patrick Longa, Geovandro Pereira, Oscar Reparaz, and Hwajeong Seo.                            
 Preprint to be available soon.
 
-**SECURITY NOTE:** no software implementation is able to guarantee 100% side-channel security. In some cases, certain powerful attacks 
+**SECURITY NOTES:** 
+* No software implementation is able to guarantee 100% side-channel security. In some cases, certain powerful attacks 
 such as template attacks can be carried out using a single target trace, making any randomization or masking technique useless.
 Moreover, the issue gets more complicated for embedded devices that lack access to a good source of randomness. Since many SCA attacks
 closely depend on the underlying hardware, it is recommended to include additional countermeasures at the software and hardware levels
 depending on the targeted platform. Also, note that hardware countermeasures are usually required to properly deal with most
 sophisticated invasive attacks.                                                          
-Finally, note that the hash function implementation used by SchnorrQ is not protected against side-channel attacks.
+* The hash function implementation in the `sha512` folder, which is used by SchnorrQ, is NOT protected against side-channel attacks such as DPA.
  
 ## Contents
 
