@@ -11,9 +11,9 @@ point attacks, and small subgroup attacks.
 
 More details can be found in: 
 
-"FourQ on embedded devices with strong countermeasures against side-channel attacks".                         
+**"FourQ on embedded devices with strong countermeasures against side-channel attacks".**                         
 Zhe Liu, Patrick Longa, Geovandro Pereira, Oscar Reparaz, and Hwajeong Seo.                            
-Preprint to be available soon.
+Preprint available [`here`](http://eprint.iacr.org/2017/434).
 
 **SECURITY NOTES:** 
 * No software implementation is able to guarantee 100% side-channel security. In some cases, certain powerful attacks 
