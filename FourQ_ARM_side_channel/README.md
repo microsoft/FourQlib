@@ -11,7 +11,7 @@ point attacks, and small subgroup attacks.
 
 More details can be found in: 
 
-**"FourQ on embedded devices with strong countermeasures against side-channel attacks".**                         
+**"FourQ on embedded devices with strong countermeasures against side-channel attacks"**, CHES 2017.                         
 Zhe Liu, Patrick Longa, Geovandro Pereira, Oscar Reparaz, and Hwajeong Seo.                            
 Preprint available [`here`](http://eprint.iacr.org/2017/434).
 
