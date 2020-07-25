@@ -18,6 +18,14 @@
     static int lock = -1;
 #endif
 
+#if defined(__WINDOWS__)
+
+#define RTL_GENRANDOM "SystemFunction036"
+
+NTSTATUS last_bcrypt_error = 0;
+
+#endif
+
 
 static __inline void delay(unsigned int count)
 {
@@ -29,8 +37,31 @@ int random_bytes(unsigned char* random_array, unsigned int nbytes)
 { // Generation of "nbytes" of random values
 
 #if defined(__WINDOWS__)	
-	if (!BCRYPT_SUCCESS(BCryptGenRandom(NULL, random_array, nbytes, BCRYPT_USE_SYSTEM_PREFERRED_RNG))) {
-		return false;
+    if (BCRYPT_SUCCESS(last_bcrypt_error))
+    {
+        NTSTATUS status = BCryptGenRandom(
+            NULL, random_array, nbytes, BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+
+        if (BCRYPT_SUCCESS(status))
+        {
+            return true;
+        }
+
+        last_bcrypt_error = status;
+    }
+
+    HMODULE hAdvApi = LoadLibraryA("ADVAPI32.DLL");
+    if (hAdvApi)
+    {
+        BOOLEAN(APIENTRY * RtlGenRandom)
+            (void*, ULONG) = (BOOLEAN(APIENTRY*)(void*, ULONG))GetProcAddress(hAdvApi, RTL_GENRANDOM);
+
+        if (!RtlGenRandom || !RtlGenRandom(random_array, nbytes))
+        {
+            return false;
+        }
+
+        FreeLibrary(hAdvApi);
     }
 
 #elif defined(__LINUX__)
