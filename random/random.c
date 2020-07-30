@@ -10,91 +10,77 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #if defined(__WINDOWS__)
-	#include <windows.h>
-	#include <bcrypt.h>
+    #include <windows.h>
+    #include <bcrypt.h>
+    #define RTL_GENRANDOM "SystemFunction036"
+    NTSTATUS last_bcrypt_error = 0;
 #elif defined(__LINUX__)
-	#include <unistd.h>
-	#include <fcntl.h>
-	static int lock = -1;
-#endif
-
-#if defined(__WINDOWS__)
-
-#define RTL_GENRANDOM "SystemFunction036"
-
-NTSTATUS last_bcrypt_error = 0;
-
+    #include <unistd.h>
+    #include <fcntl.h>
+    static int lock = -1;
 #endif
 
 
 static __inline void delay(unsigned int count)
 {
-	while (count--) {}
+    while (count--) {}
 }
 
 
 int random_bytes(unsigned char* random_array, unsigned int nbytes)
 { // Generation of "nbytes" of random values
 
-#if defined(__WINDOWS__)	
-	if (BCRYPT_SUCCESS(last_bcrypt_error))
-	{
-		NTSTATUS status = BCryptGenRandom(
-			NULL, random_array, nbytes, BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+#if defined(__WINDOWS__)    
+    if (BCRYPT_SUCCESS(last_bcrypt_error)) {
+        NTSTATUS status = BCryptGenRandom(NULL, random_array, nbytes, BCRYPT_USE_SYSTEM_PREFERRED_RNG);
 
-		if (BCRYPT_SUCCESS(status))
-		{
-			return true;
-		}
+        if (BCRYPT_SUCCESS(status)) {
+            return true;
+        }
+        last_bcrypt_error = status;
+    }
 
-		last_bcrypt_error = status;
-	}
+    HMODULE hAdvApi = LoadLibraryA("ADVAPI32.DLL");
+    if (!hAdvApi) {
+        return false;
+    }
 
-	HMODULE hAdvApi = LoadLibraryA("ADVAPI32.DLL");
-	if (!hAdvApi)
-	{
-		return false;
-	}
+    BOOLEAN(APIENTRY * RtlGenRandom)(void*, ULONG) = (BOOLEAN(APIENTRY*)(void*, ULONG))GetProcAddress(hAdvApi, RTL_GENRANDOM);
 
-	BOOLEAN(APIENTRY * RtlGenRandom)
-		(void*, ULONG) = (BOOLEAN(APIENTRY*)(void*, ULONG))GetProcAddress(hAdvApi, RTL_GENRANDOM);
+    BOOLEAN genrand_result = FALSE;
+    if (RtlGenRandom) {
+        genrand_result = RtlGenRandom(random_array, nbytes);
+    }
 
-	BOOLEAN genrand_result = FALSE;
-	if (RtlGenRandom)
-	{
-		genrand_result = RtlGenRandom(random_array, nbytes);
-	}
+    FreeLibrary(hAdvApi);
 
-	FreeLibrary(hAdvApi);
-
-	if (!genrand_result)
-	{
-		return false;
-	}
+    if (!genrand_result) {
+        return false;
+    }
 
 #elif defined(__LINUX__)
-	int r, n = nbytes, count = 0;
-	
-	if (lock == -1) {
-		do {
-			lock = open("/dev/urandom", O_RDONLY);
-			if (lock == -1) {
-				delay(0xFFFFF);
-			}
-		} while (lock == -1);
-	}
+    int r, n = nbytes, count = 0;
+    
+    if (lock == -1) {
+        do {
+            lock = open("/dev/urandom", O_RDONLY);
+            if (lock == -1) {
+                delay(0xFFFFF);
+            }
+        } while (lock == -1);
+    }
 
-	while (n > 0) {
-		do {
-			r = read(lock, random_array+count, n);
-			if (r == -1) {
-				delay(0xFFFF);
-			}
-		} while (r == -1);
-		count += r;
-		n -= r;
-	}
+    while (n > 0) {
+        do {
+            r = read(lock, random_array+count, n);
+            if (r == -1) {
+                delay(0xFFFF);
+            }
+        } while (r == -1);
+        count += r;
+        n -= r;
+    }
 #endif
 
-	return true;
+    return true;
 }
