@@ -107,7 +107,7 @@ else
     ASM_OBJECTS=fp2_1271.o
 endif 
 endif
-OBJECTS=eccp2.o eccp2_no_endo.o eccp2_core.o $(ASM_OBJECTS) crypto_util.o schnorrq.o kex.o sha512.o random.o 
+OBJECTS=eccp2.o eccp2_no_endo.o eccp2_core.o $(ASM_OBJECTS) crypto_util.o schnorrq.o hash_to_curve.o kex.o sha512.o random.o 
 OBJECTS_FP_TEST=fp_tests.o $(OBJECTS) test_extras.o 
 OBJECTS_ECC_TEST=ecc_tests.o $(OBJECTS) test_extras.o 
 OBJECTS_CRYPTO_TEST=crypto_tests.o $(OBJECTS) test_extras.o 
@@ -154,6 +154,9 @@ endif
 schnorrq.o: schnorrq.c
 	$(CC) $(CFLAGS) schnorrq.c
 
+hash_to_curve.o: hash_to_curve.c
+	$(CC) $(CFLAGS) hash_to_curve.c
+
 kex.o: kex.c
 	$(CC) $(CFLAGS) kex.c
 
@@ -181,5 +184,5 @@ fp_tests.o: tests/fp_tests.c
 .PHONY: clean
 
 clean:
-	rm -f $(SHARED_LIB_TARGET) crypto_test ecc_test fp_test fp2_1271.o fp2_1271_AVX2.o AMD64/consts.s consts.o $(OBJECTS_ALL)
+	rm -rf $(SHARED_LIB_TARGET) crypto_test ecc_test fp_test *.o AMD64/consts.s
 

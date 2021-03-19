@@ -1,4 +1,4 @@
-## FourQlib v3.0 (C Edition)
+## FourQlib v3.1 (C Edition)
 
 **FourQlib** implements essential elliptic curve and cryptographic functions based on FourQ, 
 a high-security, high-performance elliptic curve that targets the 128-bit security level [1]. At the 
@@ -10,7 +10,7 @@ The library was developed by [Microsoft Research](http://research.microsoft.com/
 
 ## Contents
 
-Version 3.0 includes the following implementations:
+Version 3.1 includes the following implementations:
  
 * [`FourQ_32bit`](FourQ_32bit/): a portable implementation especially tailored for 32-bit platforms.
 * [`FourQ_64bit_and_portable`](FourQ_64bit_and_portable/): a portable implementation for 32-bit and 64-bit platforms with optional
@@ -34,17 +34,23 @@ The library includes an implementation of SHA-512 which is used by default by Sc
 Users can provide their own PRNG and hash implementations by replacing the functions in the [`random`](random/) and [`sha512`](sha512/)folders, and applying the corresponding changes to the settings in `FourQ.h` (in a given implementation). 
 Refer to [2] for the security requirements for the cryptographic hash function. 
 
-## What's new in version 3.0
+## What's new 
+
+### In version 3.0
 
 * New support for co-factor ECDH and SchnorrQ signatures. 
 * New implementations for 32-bit processors, 32-bit ARMv6 and ARMv7 processors, and 32-bit ARM Cortex-M4 microcontroller. 
 * New implementation for ARMv6/ARMv7/ARMv7-M with strong countermeasures against several side-channel attacks.
 * New support for 64-bit ARMv8 processors.  
 
+### In version 3.1
+
+* New hash to curve functionality (only supported in the portable implementation FourQ_64bit_and_portable). 
+
 ## Main features
    
-* Support for co-factor Elliptic Curve Diffie-Hellman (ECDH) key exchange [3].
-* Support for the SchnorrQ digital signature scheme [2]. 
+* Support for co-factor Elliptic Curve Diffie-Hellman (ECDH) key exchange [3], the SchnorrQ digital signature scheme [2], and
+  hash to curve conversion. 
 * Support for 3 core elliptic curve operations: variable-base, fixed-base and double-scalar multiplications.
 * Support for Windows using Microsoft Visual Studio and Linux using GNU GCC or clang.    
 * Includes a basic implementation using portable C to enable support on a wide range of platforms including x64, x86 

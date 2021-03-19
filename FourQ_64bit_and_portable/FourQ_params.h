@@ -11,6 +11,7 @@
 * Preprint available at http://eprint.iacr.org/2015/565.
 ************************************************************************************/ 
 
+#pragma once
 #ifndef __FOURQ_PARAMS_H__
 #define __FOURQ_PARAMS_H__
 
@@ -29,5 +30,23 @@ static const uint64_t curve_order[4]       = { 0x2FB2540EC7768CE7, 0xDFBD004DFE0
 static const uint64_t Montgomery_Rprime[4] = { 0xC81DB8795FF3D621, 0x173EA5AAEA6B387D, 0x3D01B7C72136F61C, 0x0006A5F16AC8F9D3 };
 static const uint64_t Montgomery_rprime[4] = { 0xE12FE5F079BC3929, 0xD75E78B8D1FCDCF3, 0xBCE409ED76B5DB21, 0xF32702FDAFC1C074 };
 
+
+// Constants for hash to FourQ function
+
+#if (RADIX == 32)
+    static felm_t con1 = { 6651107, 0, 4290264256, 2147483647 };
+    static felm_t con2 = { 1725590130, 1719979744, 2225079900, 707200452 };
+    static felm_t b0 = { 3738038324, 2664081113, 587564626, 1252475115 };
+    static felm_t b1 = { 17, 0, 4294967284, 2147483647 };
+    static felm_t A0 = { 1289, 0, 4294966384, 2147483647 };
+    static felm_t A1 = { 1007904792, 2866591091, 4136083791, 1668973403 };
+#elif (RADIX == 64)
+    static felm_t con1 = { 6651107ULL, 9223372036850072768ULL };
+    static felm_t con2 = { 7387256751988042354ULL, 3037402815281497692ULL };
+    static felm_t b0 = { 11442141257964318772ULL, 5379339658566403666ULL };
+    static felm_t b1 = { 17ULL, 9223372036854775796ULL };
+    static felm_t A0 = { 1289ULL, 9223372036854774896ULL };
+    static felm_t A1 = { 12311914987857864728ULL, 7168186187914912079ULL };
+#endif
 
 #endif

@@ -86,7 +86,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>__WINDOWS__; _X86_; _GENERIC_; USE_ENDO=true;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -213,8 +213,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\AMD64\fp_x64.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Generic|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Generic|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\FourQ.h" />
     <ClInclude Include="..\..\FourQ_api.h" />
@@ -234,6 +234,7 @@
     <ClCompile Include="..\..\eccp2_core.c" />
     <ClCompile Include="..\..\eccp2_no_endo.c" />
     <ClCompile Include="..\..\FourQ_params.h" />
+    <ClCompile Include="..\..\hash_to_curve.c" />
     <ClCompile Include="..\..\kex.c" />
     <ClCompile Include="..\..\schnorrq.c" />
   </ItemGroup>

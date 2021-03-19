@@ -41,6 +41,9 @@ void random_order_test(digit_t* a);
 // Verification of the mLSB-set's recoding algorithm used in fixed-base scalar multiplication 
 bool verify_mLSB_recoding(uint64_t* scalar, int* digits);
 
+//  (Unsafe, non-constant-time version of) hash to curve function for testing
+void hash2curve_unsafe(f2elm_t r, point_t out);
+
 
 #ifdef __cplusplus
 }

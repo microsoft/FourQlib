@@ -131,6 +131,14 @@ ECCRYPTO_STATUS KeyGeneration(unsigned char* SecretKey, unsigned char* PublicKey
 ECCRYPTO_STATUS SecretAgreement(const unsigned char* SecretKey, const unsigned char* PublicKey, unsigned char* SharedSecret);
 
 
+/**************** Public API for hashing to curve, 64-byte public keys ****************/
+
+// Hash GF(p^2) element to a curve point
+// Input: GF(p^2) element
+// Output: point in affine coordinates with co-factor cleared
+ECCRYPTO_STATUS HashToCurve(f2elm_t r, point_t P);
+
+
 #ifdef __cplusplus
 }
 #endif
